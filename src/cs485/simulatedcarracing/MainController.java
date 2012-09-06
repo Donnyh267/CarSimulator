@@ -9,9 +9,11 @@ import scr.SensorModel;
 public class MainController extends Controller {
 	
 	BasicNetwork network;
+	HumanDriver human;
 	
 	public MainController() {
 		network = new BasicNetwork();
+		human = new HumanDriver();
 	}
 
 	@Override
