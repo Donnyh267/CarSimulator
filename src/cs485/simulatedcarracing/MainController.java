@@ -1,7 +1,5 @@
 package cs485.simulatedcarracing;
 
-import org.encog.neural.data.basic.BasicNeuralDataSet;
-
 import scr.Action;
 import scr.Controller;
 import scr.SensorModel;
@@ -14,12 +12,10 @@ public class MainController extends Controller {
 
 	private static boolean HUMANLESS = false;
 	private static boolean TEACHING = true;
-	private BasicNeuralDataSet dataset;
 	
 	public MainController() {
 		network = new NeuralNetwork();
 		human = new HumanDriver(this);
-		dataset = new BasicNeuralDataSet();
 	}
 
 	@Override
@@ -29,7 +25,7 @@ public class MainController extends Controller {
 		else {
 			Action h = human.getAction(sensors);
 			if (TEACHING) {
-				//add sensors and humanAction to dataset
+				network.addData(sensors, h);
 			}
 			return h;
 		}
@@ -43,7 +39,8 @@ public class MainController extends Controller {
 
 	@Override
 	public void shutdown() {
-		// TODO ask to train the network here
+		System.out.println("Training the network..");
+		network.train();
 	}
 
 }

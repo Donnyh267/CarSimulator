@@ -1,13 +1,8 @@
 package cs485.neuralnetwork;
 
-import java.awt.List;
 import java.io.File;
 import java.util.ArrayList;
 
-import org.encog.ml.data.MLData;
-import org.encog.ml.data.MLDataSet;
-import org.encog.ml.data.basic.BasicMLDataSet;
-import org.encog.neural.data.NeuralData;
 import org.encog.neural.data.basic.BasicNeuralData;
 import org.encog.neural.data.basic.BasicNeuralDataSet;
 import org.encog.neural.networks.BasicNetwork;
@@ -41,6 +36,10 @@ public class NeuralNetwork {
 		network.addLayer(new BasicLayer(7));	//Output Layer
 		network.getStructure().finalizeStructure();
 		network.reset();	//Initialize weights
+	}
+	
+	public void addData(SensorModel sensors, Action action){
+		addData(sensorToInput(sensors), actionToOutput(action));
 	}
 	
 	public void addData(BasicNeuralData input, BasicNeuralData idealOutout){
@@ -107,12 +106,26 @@ public class NeuralNetwork {
 		return input;
 	}
 	
+	public static BasicNeuralData actionToOutput(Action action) {
+		BasicNeuralData output = new BasicNeuralData(7);
+		output.setData(0, action.accelerate);
+		output.setData(1, action.brake);
+		output.setData(2, action.clutch);
+		output.setData(3, action.gear);
+		output.setData(4, action.steering);
+		if (action.restartRace)
+			output.setData(5, 1);
+		else
+			output.setData(5, 0);
+		output.setData(6, action.focus);
+		return output;
+	}
 	
-	public void save() {
+	private void save() {
 		EncogDirectoryPersistence.saveObject(new File(FILENAME), this.network);
 	}
 	
-	public void load() {
+	private void load() {
 		network = (BasicNetwork)EncogDirectoryPersistence.loadObject(new File(FILENAME));
 	}
 
