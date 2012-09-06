@@ -1,5 +1,8 @@
 package cs485.simulatedcarracing;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.encog.neural.networks.BasicNetwork;
 
 import scr.Action;
