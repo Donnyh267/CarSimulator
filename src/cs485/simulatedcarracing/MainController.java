@@ -1,27 +1,38 @@
 package cs485.simulatedcarracing;
 
-import java.util.HashMap;
-import java.util.Map;
-
-import org.encog.neural.networks.BasicNetwork;
+import org.encog.neural.data.basic.BasicNeuralDataSet;
 
 import scr.Action;
 import scr.Controller;
 import scr.SensorModel;
+import cs485.neuralnetwork.NeuralNetwork;
 
 public class MainController extends Controller {
 	
-	BasicNetwork network;
+	NeuralNetwork network;
 	HumanDriver human;
+
+	private static boolean HUMANLESS = false;
+	private static boolean TEACHING = true;
+	private BasicNeuralDataSet dataset;
 	
 	public MainController() {
-		network = new BasicNetwork();
-		human = new HumanDriver();
+		network = new NeuralNetwork();
+		human = new HumanDriver(this);
+		dataset = new BasicNeuralDataSet();
 	}
 
 	@Override
 	public Action control(SensorModel sensors) {
-		return human.getAction(sensors);
+		if (HUMANLESS) 
+			return network.getAction(sensors);
+		else {
+			Action h = human.getAction(sensors);
+			if (TEACHING) {
+				//add sensors and humanAction to dataset
+			}
+			return h;
+		}
 	}
 
 	@Override
@@ -32,8 +43,7 @@ public class MainController extends Controller {
 
 	@Override
 	public void shutdown() {
-		// TODO Auto-generated method stub
-		
+		// TODO ask to train the network here
 	}
 
 }
