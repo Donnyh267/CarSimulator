@@ -32,7 +32,7 @@ public class NeuralNetwork {
 	public void initialize() {
 		network = new BasicNetwork();
 		network.addLayer(new BasicLayer(23));	//Input Layer
-		network.addLayer(new BasicLayer(10));	//Hidden Layer
+		network.addLayer(new BasicLayer(10));	//Hidden Layer; you can add extra hidden layers
 		network.addLayer(new BasicLayer(7));	//Output Layer
 		network.getStructure().finalizeStructure();
 		network.reset();	//Initialize weights
@@ -53,6 +53,7 @@ public class NeuralNetwork {
 		int epoch = 1;
 		do {
 			train.iteration();
+			System.out.println("Epoch #" + epoch + " Error:" + train.getError());
 			epoch += 1;
 		} while (train.getError() > 0.01);
 		
@@ -77,9 +78,9 @@ public class NeuralNetwork {
 		newAction.gear = (int) output.getData(3);
 		newAction.steering = output.getData(4);
 		if (output.getData(5) < 0.50 && output.getData(5) >= 0)
-			newAction.restartRace = true;
-		else
 			newAction.restartRace = false;
+		else
+			newAction.restartRace = true;
 		newAction.focus = (int) output.getData(6);
 		return newAction;
 	}
