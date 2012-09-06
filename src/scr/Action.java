@@ -27,6 +27,22 @@ public class Action {
                + ") " + "(focus " + focus //ML
                + ")";
     }
+    
+    public double[] toArray(){
+    	limitValues();
+    	double[] actionArray = new double[7];
+    	actionArray[0] = this.accelerate;
+    	actionArray[1] = this.brake;
+    	actionArray[2] = this.clutch;
+    	actionArray[3] = (double) this.gear;
+    	actionArray[4] = this.steering;
+    	if (!restartRace)
+    		actionArray[5] = 0.0;
+    	else
+    		actionArray[5] = 1.0;
+    	actionArray[6] = (double) this.focus;
+    	return actionArray;
+    }
 
     public void limitValues () {
         accelerate = Math.max (0, Math.min (1, accelerate));
