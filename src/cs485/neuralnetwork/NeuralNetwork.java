@@ -7,13 +7,17 @@ import org.encog.neural.data.basic.BasicNeuralData;
 import org.encog.neural.data.basic.BasicNeuralDataSet;
 import org.encog.neural.networks.BasicNetwork;
 import org.encog.neural.networks.layers.BasicLayer;
-import org.encog.neural.networks.training.propagation.resilient.ResilientPropagation;
+import org.encog.neural.networks.training.lma.LevenbergMarquardtTraining;
 import org.encog.persist.EncogDirectoryPersistence;
 
 import scr.Action;
 import scr.SensorModel;
 
 public class NeuralNetwork {
+	
+	private static int INPUTLAYER = 23;
+	private static int[] HIDDENLAYER = {40,10};
+	private static int OUTPUTLAYER = 7;
 	
 	private final String FILENAME = "network.eg";
 	private BasicNetwork network;
@@ -31,9 +35,10 @@ public class NeuralNetwork {
 	//Build & Initialize the Network
 	public void initialize() {
 		network = new BasicNetwork();
-		network.addLayer(new BasicLayer(23));	//Input Layer
-		network.addLayer(new BasicLayer(10));	//Hidden Layer; you can add extra hidden layers
-		network.addLayer(new BasicLayer(7));	//Output Layer
+		network.addLayer(new BasicLayer(INPUTLAYER));	//Input Layer
+		for (int i:HIDDENLAYER) 
+			network.addLayer(new BasicLayer(i));	//Hidden Layer; you can add extra hidden layers
+		network.addLayer(new BasicLayer(OUTPUTLAYER));	//Output Layer
 		network.getStructure().finalizeStructure();
 		network.reset();	//Initialize weights
 	}
@@ -48,8 +53,15 @@ public class NeuralNetwork {
 	
 	//trainer function
 	public void train() {
-		final ResilientPropagation train = new ResilientPropagation(network, dataset);
+//		final ResilientPropagation train = new ResilientPropagation(network, dataset);
+//		Backpropagation train = new Backpropagation(network, dataset);
+//		NelderMeadTraining train = new NelderMeadTraining(network, dataset);
+		LevenbergMarquardtTraining train = new LevenbergMarquardtTraining(network, dataset);
+//		QuickPropagation train = new QuickPropagation(network, dataset);
+//		ScaledConjugateGradient train = new ScaledConjugateGradient(network, dataset); 
+//		ManhattanPropagation train = new ManhattanPropagation(network, dataset, 9.9); 
 		
+		System.out.println("dataset: " + dataset.getRecordCount()); 
 		System.out.println("Training Network...");
 		int epoch = 1;
 		do {

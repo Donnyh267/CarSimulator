@@ -1,5 +1,7 @@
 package cs485.simulatedcarracing;
 
+import java.util.Random;
+
 import scr.Action;
 import scr.Controller;
 import scr.SensorModel;
@@ -11,7 +13,8 @@ public class MainController extends Controller {
 	HumanDriver human;
 
 	private static boolean HUMANLESS = false;
-	private static boolean TEACHING = false;
+	private static boolean TEACHING = true;
+	private static double DATA_PROBABILITY = 0.05;
 	
 	public MainController() {
 		if (HUMANLESS || TEACHING)
@@ -26,7 +29,11 @@ public class MainController extends Controller {
 		else {
 			Action h = human.getAction(sensors);
 			if (TEACHING) {
-				network.addData(sensors, h);
+				Random r = new Random();
+				if (r.nextDouble() < DATA_PROBABILITY) {
+					System.out.println("Added a data pair");
+					network.addData(sensors, h);
+				}
 			}
 			return h;
 		}

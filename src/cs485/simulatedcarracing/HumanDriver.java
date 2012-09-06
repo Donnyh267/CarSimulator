@@ -25,9 +25,12 @@ public class HumanDriver implements KeyListener {
 	private final Action action;
 	private final Timer timerUp, timerDown, timerLeft, timerRight, timerSpace;
 	private final TimerTask taskUp, taskDown, taskLeft, taskRight, taskSpace;
+	private boolean upHeld = false, downHeld = false, leftHeld = false,
+			rightHeld = false;
 	private static final float decreasingRate = (float) 0.05;
 	private static final float increasingRate = (float) 0.2;
-	private static final long delayKeyTime = 50;
+	private static final float increasingSteeringRate = (float) 0.05;
+	private static final long delayKeyTime = 33;
 	private MainController controller;
 
 	/**
@@ -43,34 +46,50 @@ public class HumanDriver implements KeyListener {
 		timerSpace = new Timer();
 		taskUp = new TimerTask() {
 			public void run() {
-				if (action.accelerate >= decreasingRate)
-					action.accelerate -= decreasingRate;
-				else 
-					action.accelerate = 0;
+				if (upHeld) {
+					action.accelerate += increasingRate;
+				} else {
+					if (action.accelerate >= decreasingRate)
+						action.accelerate -= decreasingRate;
+					else
+						action.accelerate = 0;
+				}
 			}
 		};
 		taskDown = new TimerTask() {
 			public void run() {
-				if (action.brake >= decreasingRate)
-					action.brake -= decreasingRate;
-				else 
-					action.brake = 0;
+				if (downHeld) {
+					action.brake += increasingRate;
+				} else {
+					if (action.brake >= decreasingRate)
+						action.brake -= decreasingRate;
+					else
+						action.brake = 0;
+				}
 			}
 		};
 		taskLeft = new TimerTask() {
 			public void run() {
-				if (action.steering >= decreasingRate)
-					action.steering -= decreasingRate;
-				else if (action.steering > 0)
-					action.steering = 0;
+				if (leftHeld) {
+					action.steering += increasingSteeringRate;
+				} else {
+					if (action.steering >= decreasingRate)
+						action.steering -= decreasingRate;
+					else if (action.steering > 0)
+						action.steering = 0;
+				}
 			}
 		};
 		taskRight = new TimerTask() {
 			public void run() {
-				if (action.steering <= -decreasingRate)
-					action.steering += decreasingRate;
-				else if (action.steering < 0)
-					action.steering = 0;
+				if (rightHeld) {
+					action.steering -= increasingSteeringRate;
+				} else {
+					if (action.steering <= -decreasingRate)
+						action.steering += decreasingRate;
+					else if (action.steering < 0)
+						action.steering = 0;
+				}
 			}
 		};
 		taskSpace = new TimerTask() {
@@ -82,7 +101,7 @@ public class HumanDriver implements KeyListener {
 		timerDown.schedule(taskDown, 0, delayKeyTime);
 		timerLeft.schedule(taskLeft, 0, delayKeyTime);
 		timerRight.schedule(taskRight, 0, delayKeyTime);
-//		timerSpace.schedule(taskSpace, 0, delayKeyTime);
+		// timerSpace.schedule(taskSpace, 0, delayKeyTime);
 		SwingUtilities.invokeLater(new Runnable() {
 			public void run() {
 				displayGUI();
@@ -111,42 +130,58 @@ public class HumanDriver implements KeyListener {
 
 	public Action getAction(SensorModel sensors) {
 		action.limitValues();
-		action.clutch = clutching(sensors, (float)action.clutch);
+		action.clutch = clutching(sensors, (float) action.clutch);
 		action.gear = getGear(sensors);
 		return ActionUtilities.deepCopy(action);
 	}
 
 	private void displayInfo(KeyEvent arg0, String keyStatus) {
-		System.out.println(keyStatus + ": " + arg0.getKeyCode() +" at "+arg0.getWhen());
+		System.out.println(keyStatus + ": " + arg0.getKeyCode() + " at "
+				+ arg0.getWhen());
 	}
 
 	@Override
 	public void keyPressed(KeyEvent arg0) {
 		displayInfo(arg0, "KeyPressed");
-		try {
-			switch (arg0.getKeyCode()) {
-			case 38:
-				action.accelerate += increasingRate;
-				break;
-			case 37:
-				action.steering += increasingRate;
-				break;
-			case 39:
-				action.steering += -increasingRate;
-				break;
-			case 40:
-				action.brake += increasingRate;
-				break;
-			case 32:
-				action.clutch += increasingRate;
-				break;
-			}
-		} catch (java.lang.IllegalStateException e) {
+		switch (arg0.getKeyCode()) {
+		case 37:
+			leftHeld = true;
+			break;
+		case 38:
+			upHeld = true;
+			break;
+		case 39:
+			rightHeld = true;
+			break;
+		case 40:
+			downHeld = true;
+			break;
+		case 32:
+			action.clutch += increasingRate;
+			break;
 		}
 	}
 
 	@Override
 	public void keyReleased(KeyEvent arg0) {
+		displayInfo(arg0, "KeyReleased");
+		switch (arg0.getKeyCode()) {
+		case 37:
+			leftHeld = false;
+			break;
+		case 38:
+			upHeld = false;
+			break;
+		case 39:
+			rightHeld = false;
+			break;
+		case 40:
+			downHeld = false;
+			break;
+		case 32:
+			action.clutch -= increasingRate;
+			break;
+		}
 	}
 
 	@Override
@@ -167,29 +202,30 @@ public class HumanDriver implements KeyListener {
 	final float clutchDec = (float) 0.01;
 	final float clutchMaxModifier = (float) 1.3;
 	final float clutchMaxTime = (float) 1.5;
-	
-	/* Gear Changing Constants*/
-	final int[]  gearUp={5000,6000,6000,6500,7000,0};
-	final int[]  gearDown={0,2500,3000,3000,3500,3500};
-	
-	private int getGear(SensorModel sensors){
-	    int gear = sensors.getGear();
-	    double rpm  = sensors.getRPM();
 
-	    // if gear is 0 (N) or -1 (R) just return 1 
-	    if (gear<1)
-	        return 1;
-	    // check if the RPM value of car is greater than the one suggested 
-	    // to shift up the gear from the current one     
-	    if (gear <6 && rpm >= gearUp[gear-1])
-	        return gear + 1;
-	    else
-	    	// check if the RPM value of car is lower than the one suggested 
-	    	// to shift down the gear from the current one
-	        if (gear > 1 && rpm <= gearDown[gear-1])
-	            return gear - 1;
-	        else // otherwise keep current gear
-	            return gear;
+	/* Gear Changing Constants */
+	final int[] gearUp = { 5000, 6000, 6000, 6500, 7000, 0 };
+	final int[] gearDown = { 0, 2500, 3000, 3000, 3500, 3500 };
+
+	private int getGear(SensorModel sensors) {
+		int gear = sensors.getGear();
+		double rpm = sensors.getRPM();
+
+		// if gear is 0 (N) or -1 (R) just return 1
+		if (gear < 1)
+			return 1;
+		// check if the RPM value of car is greater than the one suggested
+		// to shift up the gear from the current one
+		if (gear < 6 && rpm >= gearUp[gear - 1])
+			return gear + 1;
+		else
+		// check if the RPM value of car is lower than the one suggested
+		// to shift down the gear from the current one
+		if (gear > 1 && rpm <= gearDown[gear - 1])
+			return gear - 1;
+		else
+			// otherwise keep current gear
+			return gear;
 	}
 
 	private float clutching(SensorModel sensors, float clutch) {
