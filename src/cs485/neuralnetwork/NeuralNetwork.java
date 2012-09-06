@@ -23,7 +23,7 @@ public class NeuralNetwork {
 	
 	//Build & Initialize the Network
 	public void initialize() {
-		network.addLayer(new BasicLayer(28));	//Input Layer
+		network.addLayer(new BasicLayer(23));	//Input Layer
 		network.addLayer(new BasicLayer(10));	//Hidden Layer
 		network.addLayer(new BasicLayer(7));	//Output Layer
 		network.getStructure().finalizeStructure();
@@ -66,8 +66,10 @@ public class NeuralNetwork {
 		inputList.add(sensors.getAngleToTrackAxis());	//Angle
 		for (double d : sensors.getTrackEdgeSensors())	//19 Track Edge sensors
 			inputList.add(d);
+		/*
 		for (double d : sensors.getFocusSensors())	//5 Focus Sensors
 			inputList.add(d);
+		*/
 		inputList.add(sensors.getTrackPosition());	//Track Position
 		inputList.add((double)sensors.getGear());	//Gear
 		
