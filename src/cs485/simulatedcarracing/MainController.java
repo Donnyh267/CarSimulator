@@ -11,10 +11,11 @@ public class MainController extends Controller {
 	HumanDriver human;
 
 	private static boolean HUMANLESS = false;
-	private static boolean TEACHING = true;
+	private static boolean TEACHING = false;
 	
 	public MainController() {
-		network = new NeuralNetwork();
+		if (HUMANLESS || TEACHING)
+			network = new NeuralNetwork();
 		human = new HumanDriver(this);
 	}
 
@@ -39,8 +40,9 @@ public class MainController extends Controller {
 
 	@Override
 	public void shutdown() {
-		System.out.println("Training the network..");
-		network.train();
+		if (TEACHING) {
+			System.out.println("Training the network..");
+			network.train();
+		}
 	}
-
 }

@@ -13,7 +13,6 @@ import javax.swing.SwingUtilities;
 
 import scr.Action;
 import scr.SensorModel;
-import scr.Controller.Stage;
 
 /**
  * this class will help a human to race the car by using an actual GUI
@@ -26,7 +25,9 @@ public class HumanDriver implements KeyListener {
 	private final Action action;
 	private final Timer timerUp, timerDown, timerLeft, timerRight, timerSpace;
 	private final TimerTask taskUp, taskDown, taskLeft, taskRight, taskSpace;
-	private static final long delayms = 10;
+	private static final float decreasingRate = (float) 0.05;
+	private static final float increasingRate = (float) 0.2;
+	private static final long delayKeyTime = 50;
 	private MainController controller;
 
 	/**
@@ -42,22 +43,34 @@ public class HumanDriver implements KeyListener {
 		timerSpace = new Timer();
 		taskUp = new TimerTask() {
 			public void run() {
-				action.accelerate = Math.max(0, action.accelerate - 1);
+				if (action.accelerate >= decreasingRate)
+					action.accelerate -= decreasingRate;
+				else 
+					action.accelerate = 0;
 			}
 		};
 		taskDown = new TimerTask() {
 			public void run() {
-				action.brake = Math.max(0, action.brake - 1);
+				if (action.brake >= decreasingRate)
+					action.brake -= decreasingRate;
+				else 
+					action.brake = 0;
 			}
 		};
 		taskLeft = new TimerTask() {
 			public void run() {
-				action.steering = 0;
+				if (action.steering >= decreasingRate)
+					action.steering -= decreasingRate;
+				else if (action.steering > 0)
+					action.steering = 0;
 			}
 		};
 		taskRight = new TimerTask() {
 			public void run() {
-				action.steering = 0;
+				if (action.steering <= -decreasingRate)
+					action.steering += decreasingRate;
+				else if (action.steering < 0)
+					action.steering = 0;
 			}
 		};
 		taskSpace = new TimerTask() {
@@ -65,6 +78,11 @@ public class HumanDriver implements KeyListener {
 				action.clutch = 0;
 			}
 		};
+		timerUp.schedule(taskUp, 0, delayKeyTime);
+		timerDown.schedule(taskDown, 0, delayKeyTime);
+		timerLeft.schedule(taskLeft, 0, delayKeyTime);
+		timerRight.schedule(taskRight, 0, delayKeyTime);
+//		timerSpace.schedule(taskSpace, 0, delayKeyTime);
 		SwingUtilities.invokeLater(new Runnable() {
 			public void run() {
 				displayGUI();
@@ -108,19 +126,19 @@ public class HumanDriver implements KeyListener {
 		try {
 			switch (arg0.getKeyCode()) {
 			case 38:
-				action.accelerate = 1.0;
+				action.accelerate += increasingRate;
 				break;
 			case 37:
-				action.steering = 1;
+				action.steering += increasingRate;
 				break;
 			case 39:
-				action.steering = -1;
+				action.steering += -increasingRate;
 				break;
 			case 40:
-				action.brake = 1;
+				action.brake += increasingRate;
 				break;
 			case 32:
-				action.clutch = 1;
+				action.clutch += increasingRate;
 				break;
 			}
 		} catch (java.lang.IllegalStateException e) {
@@ -129,24 +147,6 @@ public class HumanDriver implements KeyListener {
 
 	@Override
 	public void keyReleased(KeyEvent arg0) {
-		displayInfo(arg0, "KeyReleased");
-		switch (arg0.getKeyCode()) {
-		case 38:
-			action.accelerate = 0.0;
-			break;
-		case 37:
-			action.steering = 0;
-			break;
-		case 39:
-			action.steering = 0;
-			break;
-		case 40:
-			action.brake = 0;
-			break;
-		case 32:
-			action.clutch = 0;
-			break;
-		}
 	}
 
 	@Override
@@ -188,7 +188,7 @@ public class HumanDriver implements KeyListener {
 	    	// to shift down the gear from the current one
 	        if (gear > 1 && rpm <= gearDown[gear-1])
 	            return gear - 1;
-	        else // otherwhise keep current gear
+	        else // otherwise keep current gear
 	            return gear;
 	}
 
@@ -198,7 +198,6 @@ public class HumanDriver implements KeyListener {
 
 		// Check if the current situation is the race start
 		if (sensors.getCurrentLapTime() < clutchDeltaTime
-				&& controller.getStage() == Stage.RACE
 				&& sensors.getDistanceRaced() < clutchDeltaRaced)
 			clutch = maxClutch;
 
