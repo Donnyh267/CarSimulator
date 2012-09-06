@@ -9,6 +9,7 @@ import org.encog.ml.data.MLDataSet;
 import org.encog.ml.data.basic.BasicMLDataSet;
 import org.encog.neural.data.NeuralData;
 import org.encog.neural.data.basic.BasicNeuralData;
+import org.encog.neural.data.basic.BasicNeuralDataSet;
 import org.encog.neural.networks.BasicNetwork;
 import org.encog.neural.networks.layers.BasicLayer;
 import org.encog.persist.EncogDirectoryPersistence;
@@ -19,15 +20,30 @@ import scr.SensorModel;
 public class NeuralNetwork {
 	
 	private final String FILENAME = "network.eg";
-	private BasicNetwork network = new BasicNetwork();
+	private BasicNetwork network;
+	private BasicNeuralDataSet dataset;
+	
+	public NeuralNetwork() {
+		try {
+			load();
+		} catch (Exception e) {
+			initialize();
+		}
+		dataset = new BasicNeuralDataSet();
+	}
 	
 	//Build & Initialize the Network
 	public void initialize() {
+		network = new BasicNetwork();
 		network.addLayer(new BasicLayer(23));	//Input Layer
 		network.addLayer(new BasicLayer(10));	//Hidden Layer
 		network.addLayer(new BasicLayer(7));	//Output Layer
 		network.getStructure().finalizeStructure();
 		network.reset();	//Initialize weights
+	}
+	
+	public void addData(BasicNeuralData input, BasicNeuralData idealOutout){
+		dataset.add(input, idealOutout);
 	}
 	
 	//trainer function
