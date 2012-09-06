@@ -127,10 +127,10 @@ public class SimpleDriver extends Controller{
 	        }
 
 	        // accel/brake command is exponentially scaled w.r.t. the difference between target speed and current one
-	        return (float) (2/(1+Math.exp(sensors.getSpeed() - targetSpeed)) - 1);
+	        return (float) 0.8;
 	    }
 	    else
-	        return (float) 0.3; // when out of track returns a moderate acceleration command
+	        return (float) 0.8; // when out of track returns a moderate acceleration command
 
 	}
 

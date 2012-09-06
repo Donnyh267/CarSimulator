@@ -18,8 +18,7 @@ public class MainController extends Controller {
 
 	@Override
 	public Action control(SensorModel sensors) {
-		// TODO Auto-generated method stub
-		return null;
+		return human.getAction(sensors);
 	}
 
 	@Override

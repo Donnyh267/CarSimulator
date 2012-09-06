@@ -23,9 +23,9 @@ import scr.SensorModel;
 public class HumanDriver implements KeyListener {
     
     private final Action action;
-    private final Timer timerUp, timerDown, timerSteering, timerSpace;
-    private final TimerTask taskUp, taskDown, taskSteering, taskSpace;
-    private static final long delayms = 100; 
+    private final Timer timerUp, timerDown, timerLeft, timerRight, timerSpace;
+    private final TimerTask taskUp, taskDown, taskLeft, taskRight, taskSpace;
+    private static final long delayms = 10; 
     
     /**
      * display a GUI for human
@@ -33,7 +33,7 @@ public class HumanDriver implements KeyListener {
      */
     public HumanDriver() {
         action = new Action();
-        timerUp = new Timer(); timerDown = new Timer(); timerSteering = new Timer(); timerSpace = new Timer();
+        timerUp = new Timer(); timerDown = new Timer(); timerLeft = new Timer(); timerRight = new Timer(); timerSpace = new Timer();
         taskUp = new TimerTask(){
             public void run() {
                 action.accelerate = Math.max(0, action.accelerate-1);
@@ -44,7 +44,12 @@ public class HumanDriver implements KeyListener {
                 action.brake = Math.max(0, action.brake-1);
             }
         };
-        taskSteering = new TimerTask() {
+        taskLeft = new TimerTask() {
+            public void run() {
+                action.steering = 0;
+            }
+        };
+        taskRight = new TimerTask() {
             public void run() {
                 action.steering = 0;
             }
@@ -64,6 +69,8 @@ public class HumanDriver implements KeyListener {
     protected void displayGUI() {
         JFrame frame = new JFrame("Controller");
         JPanel panel = new JPanel(new BorderLayout());
+        frame.setContentPane(panel);
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         
         JLabel label = new JLabel();
         label.setText("<html><ul><li>Up,Down,Left,Right</li><li>Space = Clutch</li><li>Z = gear down, X = gear up</li></ul>");
@@ -88,34 +95,36 @@ public class HumanDriver implements KeyListener {
     @Override
     public void keyPressed(KeyEvent arg0) {
         displayInfo(arg0, "KeyPressed"); 
-        switch (arg0.getKeyCode()) {
-            case 38: action.accelerate = 1.0; timerUp.cancel(); break;
-            case 37: action.steering = -1; timerSteering.cancel(); break;
-            case 39: action.steering = 1; timerSteering.cancel(); break;
-            case 40: action.brake = 1; timerDown.cancel(); break;
-            case 32: action.clutch = 1; timerSpace.cancel(); break;
-        }
+        try {
+	        switch (arg0.getKeyCode()) {
+	            case 38: action.accelerate = 1.0;  break;
+	            case 37: action.steering = 1;  break;
+	            case 39: action.steering = -1; break;
+	            case 40: action.brake = 1;  break;
+	            case 32: action.clutch = 1;  break;
+	        }
+        } catch  (java.lang.IllegalStateException e) {}
     }
 
     @Override
     public void keyReleased(KeyEvent arg0) {
         displayInfo(arg0, "KeyReleased"); 
         switch (arg0.getKeyCode()) {
-            case 38: timerUp.schedule(taskUp, delayms); break;
-            case 37: timerSteering.schedule(taskSteering, delayms); break;
-            case 39: timerSteering.schedule(taskSteering, delayms); break;
-            case 40: timerDown.schedule(taskDown, delayms); break;
-            case 32: timerSpace.schedule(taskSpace, delayms); break;
+        case 38: action.accelerate = 0.0;  break;
+        case 37: action.steering = 0;  break;
+        case 39: action.steering = 0; break;
+        case 40: action.brake = 0;  break;
+        case 32: action.clutch = 0;  break;
         }        
     }
 
     @Override
     public void keyTyped(KeyEvent arg0) {
         if (arg0.getKeyChar() == 'x') {
-            action.gear = Math.max(action.gear+1, 6);
+            action.gear = Math.min(action.gear+1, 6);
         } else
         if (arg0.getKeyChar() == 'z') {
-            action.gear = Math.min(action.gear-1, -1);
+            action.gear = Math.max(action.gear-1, -1);
         }
     }
 }
