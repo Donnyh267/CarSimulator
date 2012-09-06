@@ -79,9 +79,9 @@ public class NeuralNetwork {
 		newAction.gear = (int) output.getData(3);
 		newAction.steering = output.getData(4);
 		if (output.getData(5) < 0.50 && output.getData(5) >= 0)
-			newAction.restartRace = true;
-		else
 			newAction.restartRace = false;
+		else
+			newAction.restartRace = true;
 		newAction.focus = (int) output.getData(6);
 		return newAction;
 	}
