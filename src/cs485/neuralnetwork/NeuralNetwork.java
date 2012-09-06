@@ -57,6 +57,8 @@ public class NeuralNetwork {
 			epoch += 1;
 		} while (train.getError() > 0.01);
 		
+		System.out.println("Neural Network's Error:"+train.getError());
+		
 		this.save();
 	}
 	
