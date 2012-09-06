@@ -50,6 +50,7 @@ public class NeuralNetwork {
 	public void train() {
 		final ResilientPropagation train = new ResilientPropagation(network, dataset);
 		
+		System.out.println("Training Network...");
 		int epoch = 1;
 		do {
 			train.iteration();
