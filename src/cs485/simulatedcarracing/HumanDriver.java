@@ -109,11 +109,13 @@ public class HumanDriver implements KeyListener {
 		});
 	}
 
+	JFrame frame;
+	
 	protected void displayGUI() {
-		JFrame frame = new JFrame("Controller");
+		frame = new JFrame("Controller");
 		JPanel panel = new JPanel(new BorderLayout());
 		frame.setContentPane(panel);
-		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
 		JLabel label = new JLabel();
 		label
@@ -204,10 +206,10 @@ public class HumanDriver implements KeyListener {
 	final float clutchMaxTime = (float) 1.5;
 
 	/* Gear Changing Constants */
-	final int[] gearUp = { 5000, 6000, 6000, 6500, 7000, 0 };
-	final int[] gearDown = { 0, 2500, 3000, 3000, 3500, 3500 };
+	final static int[] gearUp = { 5000, 6000, 6000, 6500, 7000, 0 };
+	final static int[] gearDown = { 0, 2500, 3000, 3000, 3500, 3500 };
 
-	private int getGear(SensorModel sensors) {
+	public static int getGear(SensorModel sensors) {
 		int gear = sensors.getGear();
 		double rpm = sensors.getRPM();
 
@@ -262,5 +264,9 @@ public class HumanDriver implements KeyListener {
 				clutch -= clutchDec;
 		}
 		return clutch;
+	}
+
+	public void shutdown() {
+		frame.dispose();timerUp.cancel();timerDown.cancel();timerRight.cancel();timerLeft.cancel();
 	}
 }
